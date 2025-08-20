@@ -13,6 +13,17 @@ import { Edit, Check, Delete } from '@mui/icons-material'
 import { CropArea } from '../types'
 import { maintainAspectRatio } from '../utils/aspectRatio'
 
+// 共通のTextField用スタイル
+const textFieldStyle = {
+  '& .MuiInputBase-input': { 
+    fontSize: '0.7rem',
+    fontFamily: 'monospace'
+  },
+  '& .MuiInputLabel-root': {
+    fontSize: '0.7rem'
+  }
+}
+
 interface CropAreaEditorProps {
   area: CropArea
   onUpdate: (updates: Partial<CropArea>) => void
@@ -222,15 +233,7 @@ const CropAreaEditor = ({
             value={editValues.x}
             onChange={(e) => handleValueChange('x', e.target.value)}
             inputProps={{ min: 0 }}
-            sx={{ 
-              '& .MuiInputBase-input': { 
-                fontSize: '0.7rem',
-                fontFamily: 'monospace'
-              },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.7rem'
-              }
-            }}
+            sx={textFieldStyle}
           />
           <TextField
             label="Y"
@@ -239,15 +242,7 @@ const CropAreaEditor = ({
             value={editValues.y}
             onChange={(e) => handleValueChange('y', e.target.value)}
             inputProps={{ min: 0 }}
-            sx={{ 
-              '& .MuiInputBase-input': { 
-                fontSize: '0.7rem',
-                fontFamily: 'monospace'
-              },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.7rem'
-              }
-            }}
+            sx={textFieldStyle}
           />
           <TextField
             label="W"
@@ -256,15 +251,7 @@ const CropAreaEditor = ({
             value={editValues.width}
             onChange={(e) => handleValueChange('width', e.target.value)}
             inputProps={{ min: 1 }}
-            sx={{ 
-              '& .MuiInputBase-input': { 
-                fontSize: '0.7rem',
-                fontFamily: 'monospace'
-              },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.7rem'
-              }
-            }}
+            sx={textFieldStyle}
           />
           <TextField
             label="H"
@@ -273,15 +260,7 @@ const CropAreaEditor = ({
             value={editValues.height}
             onChange={(e) => handleValueChange('height', e.target.value)}
             inputProps={{ min: 1 }}
-            sx={{ 
-              '& .MuiInputBase-input': { 
-                fontSize: '0.7rem',
-                fontFamily: 'monospace'
-              },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.7rem'
-              }
-            }}
+            sx={textFieldStyle}
           />
         </Box>
       ) : (
