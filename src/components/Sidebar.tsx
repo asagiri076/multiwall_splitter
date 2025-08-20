@@ -26,7 +26,7 @@ const Sidebar = ({
     <Stack spacing={2}>
       <Paper 
         elevation={2} 
-        sx={{ p: 2}}
+        sx={{ p: 2 }}
       >
         <CropAreaList 
           cropAreas={cropAreas}
@@ -41,7 +41,7 @@ const Sidebar = ({
       </Paper>
       <Paper 
         elevation={2} 
-        sx={{ p: 2}}
+        sx={{ p: 2 }}
       >
         <DownloadSection 
           cropAreas={cropAreas.filter(area => area.visible)}
