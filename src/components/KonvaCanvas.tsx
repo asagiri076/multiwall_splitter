@@ -18,7 +18,7 @@ import { getAspectRatioValue } from '../utils/aspectRatio'
 const basePaperStyle = {
   elevation: 2,
   sx: {
-    height: '75vh',
+    height: '73vh',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -37,15 +37,15 @@ interface KonvaCanvasProps {
 }
 
 // Upload 用コンポーネント
-const UploadView = ({ onImageUpload, fileInputRef }: { onImageUpload: (file: File) => void, fileInputRef: React.RefObject<HTMLInputElement> }) => {
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+const UploadView = ({ onImageUpload, fileInputRef }: { onImageUpload: (file: File) => void, fileInputRef: { current: HTMLInputElement | null } }) => {
+  const handleFileSelect = (e: { target: { files?: FileList | null } }) => {
     const file = e.target.files?.[0]
     if (file) {
       onImageUpload(file)
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: { preventDefault: () => void; dataTransfer: { files: FileList } }) => {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
     if (file && file.type.startsWith('image/')) {
@@ -53,7 +53,7 @@ const UploadView = ({ onImageUpload, fileInputRef }: { onImageUpload: (file: Fil
     }
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: { preventDefault: () => void }) => {
     e.preventDefault()
   }
 
@@ -133,7 +133,7 @@ const EditorView = ({
   selectedAreaId,
   onAreaSelect,
   onAreaUpdate
-}: Omit<KonvaCanvasProps, 'onImageUpload'>) => {
+}: Omit<KonvaCanvasProps, 'onImageUpload' | 'onImageDelete'>) => {
   const [konvaImage, setKonvaImage] = useState<HTMLImageElement | null>(null)
   const [stageSize, setStageSize] = useState({ width: 800, height: 600 })
   const [imageScale, setImageScale] = useState({ x: 1, y: 1 })
@@ -222,14 +222,14 @@ const EditorView = ({
     onAreaSelect(areaId)
   }
 
-  const handleStageClick = (e: any) => {
+  const handleStageClick = (e: Konva.KonvaEventObject<Event>) => {
     // 背景をクリックした場合は選択解除
     if (e.target === e.target.getStage()) {
       onAreaSelect(null)
     }
   }
 
-  const handleRectDragEnd = (areaId: string, e: any) => {
+  const handleRectDragEnd = (areaId: string, e: Konva.KonvaEventObject<DragEvent>) => {
     const rect = e.target
     const newX = (rect.x() - imagePosition.x) / imageScale.x
     const newY = (rect.y() - imagePosition.y) / imageScale.y
@@ -240,7 +240,7 @@ const EditorView = ({
     })
   }
 
-  const handleRectTransformEnd = (areaId: string, e: any) => {
+  const handleRectTransformEnd = (areaId: string, e: Konva.KonvaEventObject<Event>) => {
     const rect = e.target
     
     // スケールを実際のサイズに変換

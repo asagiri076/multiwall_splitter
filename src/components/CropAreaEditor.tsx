@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { 
   Paper, 
   Box, 
@@ -7,8 +7,7 @@ import {
   IconButton, 
   Chip, 
   Typography,
-  Tooltip,
-  Grid
+  Tooltip
 } from '@mui/material'
 import { Edit, Check, Delete } from '@mui/icons-material'
 import { CropArea } from '../types'
@@ -215,88 +214,76 @@ const CropAreaEditor = ({
       </Box>
       
       {isEditing ? (
-        <Grid container spacing={1} sx={{ mt: 0.5 }}>
-          <Grid item xs={6}>
-            <TextField
-              label="X"
-              type="number"
-              size="small"
-              value={editValues.x}
-              onChange={(e) => handleValueChange('x', e.target.value)}
-              inputProps={{ min: 0 }}
-              fullWidth
-              sx={{ 
-                '& .MuiInputBase-input': { 
-                  fontSize: '0.7rem',
-                  fontFamily: 'monospace'
-                },
-                '& .MuiInputLabel-root': {
-                  fontSize: '0.7rem'
-                }
-              }}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Y"
-              type="number"
-              size="small"
-              value={editValues.y}
-              onChange={(e) => handleValueChange('y', e.target.value)}
-              inputProps={{ min: 0 }}
-              fullWidth
-              sx={{ 
-                '& .MuiInputBase-input': { 
-                  fontSize: '0.7rem',
-                  fontFamily: 'monospace'
-                },
-                '& .MuiInputLabel-root': {
-                  fontSize: '0.7rem'
-                }
-              }}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="W"
-              type="number"
-              size="small"
-              value={editValues.width}
-              onChange={(e) => handleValueChange('width', e.target.value)}
-              inputProps={{ min: 1 }}
-              fullWidth
-              sx={{ 
-                '& .MuiInputBase-input': { 
-                  fontSize: '0.7rem',
-                  fontFamily: 'monospace'
-                },
-                '& .MuiInputLabel-root': {
-                  fontSize: '0.7rem'
-                }
-              }}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="H"
-              type="number"
-              size="small"
-              value={editValues.height}
-              onChange={(e) => handleValueChange('height', e.target.value)}
-              inputProps={{ min: 1 }}
-              fullWidth
-              sx={{ 
-                '& .MuiInputBase-input': { 
-                  fontSize: '0.7rem',
-                  fontFamily: 'monospace'
-                },
-                '& .MuiInputLabel-root': {
-                  fontSize: '0.7rem'
-                }
-              }}
-            />
-          </Grid>
-        </Grid>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mt: 0.5 }}>
+          <TextField
+            label="X"
+            type="number"
+            size="small"
+            value={editValues.x}
+            onChange={(e) => handleValueChange('x', e.target.value)}
+            inputProps={{ min: 0 }}
+            sx={{ 
+              '& .MuiInputBase-input': { 
+                fontSize: '0.7rem',
+                fontFamily: 'monospace'
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: '0.7rem'
+              }
+            }}
+          />
+          <TextField
+            label="Y"
+            type="number"
+            size="small"
+            value={editValues.y}
+            onChange={(e) => handleValueChange('y', e.target.value)}
+            inputProps={{ min: 0 }}
+            sx={{ 
+              '& .MuiInputBase-input': { 
+                fontSize: '0.7rem',
+                fontFamily: 'monospace'
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: '0.7rem'
+              }
+            }}
+          />
+          <TextField
+            label="W"
+            type="number"
+            size="small"
+            value={editValues.width}
+            onChange={(e) => handleValueChange('width', e.target.value)}
+            inputProps={{ min: 1 }}
+            sx={{ 
+              '& .MuiInputBase-input': { 
+                fontSize: '0.7rem',
+                fontFamily: 'monospace'
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: '0.7rem'
+              }
+            }}
+          />
+          <TextField
+            label="H"
+            type="number"
+            size="small"
+            value={editValues.height}
+            onChange={(e) => handleValueChange('height', e.target.value)}
+            inputProps={{ min: 1 }}
+            sx={{ 
+              '& .MuiInputBase-input': { 
+                fontSize: '0.7rem',
+                fontFamily: 'monospace'
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: '0.7rem'
+              }
+            }}
+          />
+        </Box>
       ) : (
         <Box 
           onClick={onSelect}
