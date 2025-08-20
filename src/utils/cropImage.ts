@@ -21,12 +21,12 @@ export const cropImage = (
         0, 0, cropArea.width, cropArea.height // Destination rectangle
       )
       
-      // Convert canvas to blob
+      // Convert canvas to blob (JPEG format with 0.9 quality)
       canvas.toBlob((blob) => {
         if (blob) {
           resolve(blob)
         }
-      }, 'image/png')
+      }, 'image/jpeg', 0.9)
     }
     img.src = image.dataUrl
   })

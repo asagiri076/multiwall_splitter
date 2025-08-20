@@ -20,14 +20,14 @@ const Header = () => {
           fontWeight: 'bold'
         }}
       >
-        画像切り出しアプリ
+        マルチディスプレイ壁紙作成
       </Typography>
       <Typography 
         variant="body1" 
         color="text.secondary"
         sx={{ m: 0 }}
       >
-        1枚の画像から複数の範囲を切り出して、個別の画像として保存できます
+        1枚の壁紙画像から複数のモニター用画像を切り出してマルチディスプレイ環境を構築
       </Typography>
     </Paper>
   )

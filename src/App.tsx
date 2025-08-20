@@ -22,10 +22,19 @@ function App() {
           width: img.width,
           height: img.height
         })
+        // 画像変更時に切り出し範囲をリセット
+        setCropAreas([])
+        setSelectedAreaId(null)
       }
       img.src = e.target?.result as string
     }
     reader.readAsDataURL(file)
+  }
+
+  const handleImageDelete = () => {
+    setImage(null)
+    setCropAreas([])
+    setSelectedAreaId(null)
   }
 
   const addCropArea = (aspectRatio: CropArea['aspectRatio'], customAspectRatio?: string) => {
@@ -96,6 +105,7 @@ function App() {
               onImageUpload={handleImageUpload}
               onAreaSelect={setSelectedAreaId}
               onAreaUpdate={updateCropArea}
+              onImageDelete={handleImageDelete}
             />
           </Box>
           <Box

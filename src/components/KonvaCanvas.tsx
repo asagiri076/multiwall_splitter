@@ -7,11 +7,24 @@ import {
   Button, 
   Typography, 
   Chip,
-  Stack
+  Stack,
+  IconButton
 } from '@mui/material'
-import { CloudUpload, Image, Info } from '@mui/icons-material'
+import { CloudUpload, Image, Info, Delete } from '@mui/icons-material'
 import { ImageData, CropArea } from '../types'
 import { getAspectRatioValue } from '../utils/aspectRatio'
+
+// 共通のPaperスタイル
+const basePaperStyle = {
+  elevation: 2,
+  sx: {
+    height: '73vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    p: 3,
+  }
+}
 
 interface KonvaCanvasProps {
   image: ImageData | null
@@ -20,18 +33,19 @@ interface KonvaCanvasProps {
   onImageUpload: (file: File) => void
   onAreaSelect: (id: string | null) => void
   onAreaUpdate: (id: string, updates: Partial<CropArea>) => void
+  onImageDelete: () => void
 }
 
 // Upload 用コンポーネント
-const UploadView = ({ onImageUpload, fileInputRef }: { onImageUpload: (file: File) => void, fileInputRef: React.RefObject<HTMLInputElement> }) => {
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+const UploadView = ({ onImageUpload, fileInputRef }: { onImageUpload: (file: File) => void, fileInputRef: { current: HTMLInputElement | null } }) => {
+  const handleFileSelect = (e: { target: { files?: FileList | null } }) => {
     const file = e.target.files?.[0]
     if (file) {
       onImageUpload(file)
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: { preventDefault: () => void; dataTransfer: { files: FileList } }) => {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
     if (file && file.type.startsWith('image/')) {
@@ -39,7 +53,7 @@ const UploadView = ({ onImageUpload, fileInputRef }: { onImageUpload: (file: Fil
     }
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: { preventDefault: () => void }) => {
     e.preventDefault()
   }
 
@@ -49,15 +63,9 @@ const UploadView = ({ onImageUpload, fileInputRef }: { onImageUpload: (file: Fil
 
   return (
     <Paper
-      elevation={2}
+      {...basePaperStyle}
       sx={{
-        width: 840,
-        height: 640,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 3,
-        mb: 2,
+        ...basePaperStyle.sx,
         cursor: 'pointer',
         border: '2px dashed',
         borderColor: 'divider',
@@ -125,13 +133,36 @@ const EditorView = ({
   selectedAreaId,
   onAreaSelect,
   onAreaUpdate
-}: Omit<KonvaCanvasProps, 'onImageUpload'>) => {
+}: Omit<KonvaCanvasProps, 'onImageUpload' | 'onImageDelete'>) => {
   const [konvaImage, setKonvaImage] = useState<HTMLImageElement | null>(null)
-  const stageSize = { width: 800, height: 600 }
+  const [stageSize, setStageSize] = useState({ width: 800, height: 600 })
   const [imageScale, setImageScale] = useState({ x: 1, y: 1 })
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 })
   const transformerRef = useRef<Konva.Transformer | null>(null)
   const stageRef = useRef<Konva.Stage | null>(null)
+  
+  // 動的サイズ計算
+  useEffect(() => {
+    const updateStageSize = () => {
+      const availableHeight = window.innerHeight * 0.8 - 120 // 80vh - padding等
+      const availableWidth = Math.min(window.innerWidth * 0.6, 1000) // 最大1000px
+      const aspectRatio = 4/3 // デフォルトアスペクト比
+      
+      let newWidth = availableWidth
+      let newHeight = availableWidth / aspectRatio
+      
+      if (newHeight > availableHeight) {
+        newHeight = availableHeight
+        newWidth = availableHeight * aspectRatio
+      }
+      
+      setStageSize({ width: newWidth, height: newHeight })
+    }
+    
+    updateStageSize()
+    window.addEventListener('resize', updateStageSize)
+    return () => window.removeEventListener('resize', updateStageSize)
+  }, [])
 
   // 画像をロードしてKonvaImageオブジェクトを作成
   useEffect(() => {
@@ -141,9 +172,9 @@ const EditorView = ({
       img.onload = () => {
         setKonvaImage(img)
         
-        // 画像をキャンバスにフィットさせる計算
-        const containerWidth = 800
-        const containerHeight = 600
+        // 画像をキャンバスにフィットさせる計算  
+        const containerWidth = stageSize.width
+        const containerHeight = stageSize.height
         const imageAspect = img.width / img.height
         const containerAspect = containerWidth / containerHeight
         
@@ -170,7 +201,7 @@ const EditorView = ({
       }
       img.src = image.dataUrl
     }
-  }, [image])
+  }, [image, stageSize])
 
   // Transformerの設定
   useEffect(() => {
@@ -191,14 +222,14 @@ const EditorView = ({
     onAreaSelect(areaId)
   }
 
-  const handleStageClick = (e: any) => {
+  const handleStageClick = (e: Konva.KonvaEventObject<Event>) => {
     // 背景をクリックした場合は選択解除
     if (e.target === e.target.getStage()) {
       onAreaSelect(null)
     }
   }
 
-  const handleRectDragEnd = (areaId: string, e: any) => {
+  const handleRectDragEnd = (areaId: string, e: Konva.KonvaEventObject<DragEvent>) => {
     const rect = e.target
     const newX = (rect.x() - imagePosition.x) / imageScale.x
     const newY = (rect.y() - imagePosition.y) / imageScale.y
@@ -209,7 +240,7 @@ const EditorView = ({
     })
   }
 
-  const handleRectTransformEnd = (areaId: string, e: any) => {
+  const handleRectTransformEnd = (areaId: string, e: Konva.KonvaEventObject<Event>) => {
     const rect = e.target
     
     // スケールを実際のサイズに変換
@@ -237,19 +268,13 @@ const EditorView = ({
   }
 
   return (
-    <Stack spacing={2}>
-      <Paper
-        elevation={2}
-        sx={{
-          width: 840,
-          height: 640,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 3,
-          overflow: 'hidden'
-        }}
-      >
+    <Paper
+      {...basePaperStyle}
+      sx={{
+        ...basePaperStyle.sx,
+        overflow: 'hidden'
+      }}
+    >
         <Stage
           ref={stageRef}
           width={stageSize.width}
@@ -370,33 +395,7 @@ const EditorView = ({
             />
           </Layer>
         </Stage>
-      </Paper>
-      
-      <Box 
-        sx={{ 
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          px: 1
-        }}
-      >
-        <Chip 
-          icon={<Info />}
-          label={`${image!.file.name}`}
-          variant="outlined"
-          color="primary"
-        />
-        <Typography variant="body2" color="text.secondary">
-          {image!.width} × {image!.height} px
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {Math.round(image!.file.size / 1024 / 1024 * 10) / 10} MB
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
-          💡 切り抜き範囲をクリックして選択・リサイズハンドルでサイズ変更
-        </Typography>
-      </Box>
-    </Stack>
+    </Paper>
   )
 }
 
@@ -407,7 +406,8 @@ const KonvaCanvas = ({
   selectedAreaId,
   onImageUpload,
   onAreaSelect,
-  onAreaUpdate
+  onAreaUpdate,
+  onImageDelete
 }: KonvaCanvasProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -416,13 +416,51 @@ const KonvaCanvas = ({
   }
 
   return (
-    <EditorView
-      image={image}
-      cropAreas={cropAreas}
-      selectedAreaId={selectedAreaId}
-      onAreaSelect={onAreaSelect}
-      onAreaUpdate={onAreaUpdate}
-    />
+    <Stack spacing={2}>
+      <EditorView
+        image={image}
+        cropAreas={cropAreas}
+        selectedAreaId={selectedAreaId}
+        onAreaSelect={onAreaSelect}
+        onAreaUpdate={onAreaUpdate}
+      />
+      
+      {/* 画像情報と操作説明 */}
+      <Box 
+        sx={{ 
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          px: 1
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Chip 
+            icon={<Info />}
+            label={image.file.name}
+            variant="outlined"
+            color="primary"
+          />
+          <IconButton
+            onClick={onImageDelete}
+            color="error"
+            size="small"
+            title="画像を削除"
+          >
+            <Delete fontSize="small" />
+          </IconButton>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          {image.width} × {image.height} px
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {Math.round(image.file.size / 1024 / 1024 * 10) / 10} MB
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
+          💡 切り抜き範囲をクリックして選択・リサイズハンドルでサイズ変更
+        </Typography>
+      </Box>
+    </Stack>
   )
 }
 
